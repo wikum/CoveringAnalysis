@@ -1,0 +1,1 @@
+# Read  binary data from ../DATA, compute the coverings and save the results in ../OBJ

@@ -1,0 +1,1 @@
+# Read  data from ../DATA, process them into binary matrices (mutation/copy number/divergence/combined, etc), and save the processed data in ../DATA

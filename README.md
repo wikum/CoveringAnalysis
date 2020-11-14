@@ -5,7 +5,10 @@ Code for running the analysis in Ke et al., "Efficient Representations of Tumor 
 The main script run_all.R will launch other scripts for running various parts of the analysis.
 
 For any questions, please contact one of the maintainers:
-	Wikum Dinalankara <wdd4001 at med.cornell.edu>
+
+	Wikum Dinalankara [wdd4001 at med.cornell.edu]
+	
 	Qian Ke <qke1 at jhu.edu>
+	
 	Luigi Marchionni <lum4003 at med.cornell.edu>
 

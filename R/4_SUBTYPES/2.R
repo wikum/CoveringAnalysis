@@ -1,5 +1,10 @@
 
+# aberration probabilities
+
 sink("2.log.txt", split=TRUE)
+
+rm(list=ls())
+gc()
 
 tryCatch({
   

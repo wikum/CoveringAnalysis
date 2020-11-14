@@ -1,6 +1,9 @@
 
 # pair coverings
 
+rm(list=ls())
+gc()
+
 require(lpcover)
 
 l1 = load("../DATA/PAIR/mat.list.pair.rda")

@@ -1,6 +1,9 @@
 
 # motif subtype analysis 
 
+rm(list=ls())
+gc()
+
 sink("1.log.txt", split=TRUE)
 
 tryCatch({

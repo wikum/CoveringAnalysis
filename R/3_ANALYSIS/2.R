@@ -1,6 +1,10 @@
 
 # sample graphs
 
+rm(list=ls())
+gc()
+
+
 require(ggplot2)
 require(network)
 require(ggnet)

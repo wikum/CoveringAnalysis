@@ -1,6 +1,10 @@
 
 # pair covering graph
 
+rm(list=ls())
+gc()
+
+
 require(ggplot2)
 require(network)
 require(ggnet)

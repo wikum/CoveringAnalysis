@@ -1,6 +1,9 @@
 
 # source coverings
 
+rm(list=ls())
+gc()
+
 require(lpcover)
 
 l1 = load("../DATA/SOURCE/mat.list.source.rda")

@@ -3,6 +3,9 @@
 
 require(lpcover)
 
+rm(list=ls())
+gc()
+
 l1 = load("../DATA/TARGET/mat.list.target.rda")
 
 mat.list.target = mat.list.target[-4]

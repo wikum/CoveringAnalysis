@@ -13,7 +13,7 @@ library(plyr)
 
 source("util.R")
 
-DATA_DIR = "../DATA"
+DATA_DIR = "../DATA/TCGA"
 
 ####load dataset computed from previous study 
 load("~/Dropbox (MechPred)/GeneProject/ Gene project/TF/analysis/PathwayCommons/result3/TCGATernaryAll.rda")

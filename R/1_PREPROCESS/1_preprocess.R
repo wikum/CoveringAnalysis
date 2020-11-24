@@ -1,18 +1,19 @@
+
 #### use all normal to compute divergence
 #### build binary expression for rna, dna, mut,cnv 
 
 rm(list=ls())
 
+### load libraries
 
-setwd("~/Dropbox (MechPred)/GeneProject/ Gene project/TF/analysis/PathwayCommons/code5")
-
-
-### load library
-
+library(SummarizedExperiment)
 library(divergence)
 library(knitr)
 library(plyr)
-library(divergence)
+
+source("util.R")
+
+DATA_DIR = "../DATA"
 
 ####load dataset computed from previous study 
 load("~/Dropbox (MechPred)/GeneProject/ Gene project/TF/analysis/PathwayCommons/result3/TCGATernaryAll.rda")
@@ -20,27 +21,35 @@ load("~/Dropbox (MechPred)/GeneProject/ Gene project/TF/analysis/PathwayCommons/
 ###########################construct matrix for RNA, Mutation, CNV##############
 #### read table 
 
-BreastPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/PHENOTYPES/TCGA/BRCA_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
-Breast <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+BreastPheno <- read.table(sprintf("%s/BREAST/BRCA_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
+Breast <- read.table(sprintf("%s/BREAST/HiSeqV2.gz", DATA_DIR), 
+                     stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
+ColonPheno <- read.table(sprintf("%s/COLON/COAD_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
+Colon <- read.table(sprintf("%s/COLON/HiSeqV2.gz", DATA_DIR), 
+                    stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-ColonPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/PHENOTYPES/TCGA/COAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
-Colon <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+KidneyPheno <- read.table(sprintf("%s/KIDNEY/KIRC_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Kidney<- read.table(sprintf("%s/KIDNEY/HiSeqV2.gz", DATA_DIR), 
+                    stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-KidneyPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/PHENOTYPES/TCGA/KIRC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Kidney<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+LiverPheno <- read.table(sprintf("%s/LIVER/LIHC_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Liver<- read.table(sprintf("%s/LIVER/HiSeqV2.gz", DATA_DIR), 
+                   stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
+LungPheno <- read.table(sprintf("%s/LUNG/LUAD_clinicalMatrix.gz", DATA_DIR), 
+                        sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Lung<- read.table(sprintf("%s/LUNG/HiSeqV2.gz", DATA_DIR), 
+                  stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-LiverPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/PHENOTYPES/TCGA/LIHC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Liver<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
-
-LungPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/PHENOTYPES/TCGA/LUAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Lung<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
-
-
-ProstatePheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/PHENOTYPES/TCGA/PRAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Prostate<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/RNASeq/TCGA/HiSeqV2.gz", stringsAsFactors = FALSE, header = TRUE, row.names = 1)
-
+ProstatePheno <- read.table(sprintf("%s/PROSTATE/PRAD_clinicalMatrix.gz", DATA_DIR), 
+                            sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Prostate<- read.table(sprintf("%s/PROSTATE/HiSeqV2.gz", DATA_DIR), 
+                      stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
 ##### combined different tissues and get interesection of samples between phenotype and RNAseq data
 
@@ -79,7 +88,7 @@ lapply(1:length(tissues), function(i){
 
 ### compute divergence
 
-library(SummarizedExperiment)
+
 
 MultiDiv <- lapply(1:length(tissues), function(i){
   
@@ -116,23 +125,35 @@ names(MultiDiv) <- tissues
 #### Binary Expression for Mutation
 #### read table 
 
-BreastPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/PHENOTYPES/TCGA/BRCA_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
-Breast <- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/MUTATION/TCGA/mutation_curated_wustl_gene.gz",sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
+BreastPheno <- read.table(sprintf("%s/BREAST/BRCA_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
+Breast <- read.csv(sprintf("%s/BREAST/mutation_curated_wustl_gene.gz", DATA_DIR),
+                   sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
 
-ColonPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/PHENOTYPES/TCGA/COAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
-Colon <- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/MUTATION/TCGA/mutation_bcm_gene.gz",sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+ColonPheno <- read.table(sprintf("%s/COLON/COAD_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
+Colon <- read.csv(sprintf("%s/COLON/mutation_bcm_gene.gz", DATA_DIR),
+                  sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-KidneyPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/PHENOTYPES/TCGA/KIRC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Kidney<- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/MUTATION/TCGA/mutation_bcm_gene.gz",sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+KidneyPheno <- read.table(sprintf("%s/KIDNEY/KIRC_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Kidney<- read.csv(sprintf("%s/KIDNEY/mutation_bcm_gene.gz", DATA_DIR),
+                  sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-LiverPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/PHENOTYPES/TCGA/LIHC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Liver<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/MUTATION/TCGA/mutation_bcm_gene.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+LiverPheno <- read.table(sprintf("%s/LIVER/LIHC_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Liver<- read.table(sprintf("%s/LIVER/mutation_bcm_gene.gz", DATA_DIR), 
+                   sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-LungPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/PHENOTYPES/TCGA/LUAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Lung<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/MUTATION/TCGA/mutation_broad_gene.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+LungPheno <- read.table(sprintf("%s/LUNG/LUAD_clinicalMatrix.gz", DATA_DIR), 
+                        sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Lung<- read.table(sprintf("%s/LUNG/mutation_broad_gene.gz", DATA_DIR), 
+                  sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-ProstatePheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/PHENOTYPES/TCGA/PRAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Prostate<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/MUTATION/TCGA/mutation_broad_gene.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+ProstatePheno <- read.table(sprintf("%s/PROSTATE/PRAD_clinicalMatrix.gz", DATA_DIR), 
+                            sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Prostate<- read.table(sprintf("%s/PROSTATE/mutation_broad_gene.gz", DATA_DIR), 
+                      sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
 
 ##### combined different tissues and get interesection of samples between phenotype and RNAseq data
@@ -193,23 +214,35 @@ names(MultiMut) <- tissues
 
 #### read table 
 
-BreastPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/PHENOTYPES/TCGA/BRCA_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
-Breast <- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/BREAST/BRCA/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz",sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
+BreastPheno <- read.table(sprintf("%s/BREAST/BRCA_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,dec = ".", header = TRUE, row.names = 1, check.names = FALSE)
+Breast <- read.csv(sprintf("%s/BREAST/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR),
+                   sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
 
-ColonPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/PHENOTYPES/TCGA/COAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
-Colon <- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/COLON/COAD/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz",sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+ColonPheno <- read.table(sprintf("%s/COLON/COAD_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names = 1, header = TRUE)
+Colon <- read.csv(sprintf("%s/COLON/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR),
+                  sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-KidneyPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/PHENOTYPES/TCGA/KIRC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Kidney<- read.csv("~/Dropbox (MechPred)/MechPred/DATA_V2/KIDNEY/KIRC/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz",sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+KidneyPheno <- read.table(sprintf("%s/KIDNEY/KIRC_clinicalMatrix.gz", DATA_DIR), 
+                          sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Kidney<- read.csv(sprintf("%s/KIDNEY/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR),
+                  sep='\t', stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-LiverPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/PHENOTYPES/TCGA/LIHC_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Liver<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LIVER/LIHC/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+LiverPheno <- read.table(sprintf("%s/LIVER/LIHC_clinicalMatrix.gz", DATA_DIR), 
+                         sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Liver<- read.table(sprintf("%s/LIVER/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR), 
+                   sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-LungPheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/PHENOTYPES/TCGA/LUAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
-Lung<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/LUNG/LUAD/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+LungPheno <- read.table(sprintf("%s/LUNG/LUAD_clinicalMatrix.gz", DATA_DIR), 
+                        sep='\t',stringsAsFactors = FALSE,row.names = 1, header = TRUE)
+Lung<- read.table(sprintf("%s/LUNG/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR), 
+                  sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
-ProstatePheno <- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/PHENOTYPES/TCGA/PRAD_clinicalMatrix.gz", sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
-Prostate<- read.table("~/Dropbox (MechPred)/MechPred/DATA_V2/PROSTATE/PRAD/COPYNUMBER_gistic/TCGA/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
+ProstatePheno <- read.table(sprintf("%s/PROSTATE/PRAD_clinicalMatrix.gz", DATA_DIR), 
+                            sep='\t',stringsAsFactors = FALSE, row.names=1,header = TRUE)
+Prostate<- read.table(sprintf("%s/PROSTATE/Gistic2_CopyNumber_Gistic2_all_thresholded.by_genes.gz", DATA_DIR), 
+                      sep='\t',stringsAsFactors = FALSE, header = TRUE, row.names = 1)
 
 
 ##### combined different tissues and get interesection of samples between phenotype and RNAseq data
@@ -301,14 +334,10 @@ names(pheno.combined) <- tissues
 
 #####################################Construct Pairs from PathwayCommons#########
 
-#### load library
-
-library(dplyr)
-
-
 #####################################Reactome Pairs######################
 #### read pairs 
-Reactome <- read.csv("~/Dropbox (MechPred)/GeneProject/ Gene project/TF/analysis/PathwayCommons/data/PathwayCommons10.reactome.hgnc.txt.gz",sep='\t', header = TRUE,stringsAsFactors = FALSE)
+Reactome <- read.csv(sprintf("%s/MECHANISM/PathwayCommons10.reactome.hgnc.txt.gz", DATA_DIR),
+                     sep='\t', header = TRUE,stringsAsFactors = FALSE)
 control_relation <-c("controls-expression-of", "controls-state-change-of")
 PC_Reactome <- Reactome[Reactome$INTERACTION_TYPE %in% control_relation &Reactome$PATHWAY_NAMES !="" ,]
 
